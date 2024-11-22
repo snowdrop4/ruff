@@ -2,13 +2,12 @@ use ruff_diagnostics::{Diagnostic, Violation};
 use ruff_macros::{derive_message_formats, violation};
 use ruff_python_ast::helpers::is_compound_statement;
 use ruff_python_ast::{self as ast, Expr, Stmt, WithItem};
-use ruff_python_semantic::SemanticModel;
 use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::registry::Rule;
 
-use super::helpers::is_empty_or_null_string;
+use super::helpers::{is_empty_or_null_string, is_non_trivial_with_body, is_pytest_raises};
 
 /// ## What it does
 /// Checks for `pytest.raises` context managers with multiple statements.
@@ -151,20 +150,6 @@ impl Violation for PytestRaisesWithoutException {
     }
 }
 
-fn is_pytest_raises(func: &Expr, semantic: &SemanticModel) -> bool {
-    semantic
-        .resolve_qualified_name(func)
-        .is_some_and(|qualified_name| matches!(qualified_name.segments(), ["pytest", "raises"]))
-}
-
-const fn is_non_trivial_with_body(body: &[Stmt]) -> bool {
-    if let [stmt] = body {
-        is_compound_statement(stmt)
-    } else {
-        true
-    }
-}
-
 pub(crate) fn raises_call(checker: &mut Checker, call: &ast::ExprCall) {
     if is_pytest_raises(&call.func, checker.semantic()) {
         if checker.enabled(Rule::PytestRaisesWithoutException) {
@@ -190,6 +175,7 @@ pub(crate) fn raises_call(checker: &mut Checker, call: &ast::ExprCall) {
     }
 }
 
+/// PT012
 pub(crate) fn complex_raises(
     checker: &mut Checker,
     stmt: &Stmt,

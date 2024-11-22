@@ -1,8 +1,8 @@
 use std::fmt;
 
-use ruff_python_ast::helpers::map_callable;
+use ruff_python_ast::helpers::{is_compound_statement, map_callable};
 use ruff_python_ast::name::UnqualifiedName;
-use ruff_python_ast::{self as ast, Decorator, Expr, ExprCall, Keyword};
+use ruff_python_ast::{self as ast, Decorator, Expr, ExprCall, Keyword, Stmt};
 use ruff_python_semantic::SemanticModel;
 use ruff_python_trivia::PythonWhitespace;
 
@@ -46,6 +46,18 @@ pub(super) fn is_pytest_parametrize(call: &ExprCall, semantic: &SemanticModel) -
         })
 }
 
+pub(super) fn is_pytest_raises(func: &Expr, semantic: &SemanticModel) -> bool {
+    semantic
+        .resolve_qualified_name(func)
+        .is_some_and(|qualified_name| matches!(qualified_name.segments(), ["pytest", "raises"]))
+}
+
+pub(super) fn is_pytest_warns(func: &Expr, semantic: &SemanticModel) -> bool {
+    semantic
+        .resolve_qualified_name(func)
+        .is_some_and(|qualified_name| matches!(qualified_name.segments(), ["pytest", "warns"]))
+}
+
 pub(super) fn keyword_is_literal(keyword: &Keyword, literal: &str) -> bool {
     if let Expr::StringLiteral(ast::ExprStringLiteral { value, .. }) = &keyword.value {
         value == literal
@@ -77,6 +89,14 @@ fn is_empty_or_null_fstring_element(element: &ast::FStringElement) -> bool {
         ast::FStringElement::Expression(ast::FStringExpressionElement { expression, .. }) => {
             is_empty_or_null_string(expression)
         }
+    }
+}
+
+pub(super) const fn is_non_trivial_with_body(body: &[Stmt]) -> bool {
+    if let [stmt] = body {
+        is_compound_statement(stmt)
+    } else {
+        true
     }
 }
 

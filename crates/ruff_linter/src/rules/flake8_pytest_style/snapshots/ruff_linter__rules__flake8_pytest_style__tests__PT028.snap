@@ -1,0 +1,88 @@
+---
+source: crates/ruff_linter/src/rules/flake8_pytest_style/mod.rs
+snapshot_kind: text
+---
+PT028.py:42:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+41 |   def test_error_multiple_statements():
+42 |       with pytest.warns(UserWarning):
+   |  _____^
+43 | |         len([])
+44 | |         [].size
+   | |_______________^ PT028
+   |
+
+PT028.py:48:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+47 |   async def test_error_complex_statement():
+48 |       with pytest.warns(UserWarning):
+   |  _____^
+49 | |         if True:
+50 | |             [].size
+   | |___________________^ PT028
+51 |   
+52 |       with pytest.warns(UserWarning):
+   |
+
+PT028.py:52:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+50 |               [].size
+51 |   
+52 |       with pytest.warns(UserWarning):
+   |  _____^
+53 | |         for i in []:
+54 | |             [].size
+   | |___________________^ PT028
+55 |   
+56 |       with pytest.warns(UserWarning):
+   |
+
+PT028.py:56:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+54 |               [].size
+55 |   
+56 |       with pytest.warns(UserWarning):
+   |  _____^
+57 | |         async for i in []:
+58 | |             [].size
+   | |___________________^ PT028
+59 |   
+60 |       with pytest.warns(UserWarning):
+   |
+
+PT028.py:60:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+58 |               [].size
+59 |   
+60 |       with pytest.warns(UserWarning):
+   |  _____^
+61 | |         while True:
+62 | |             [].size
+   | |___________________^ PT028
+63 |   
+64 |       with pytest.warns(UserWarning):
+   |
+
+PT028.py:64:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+62 |               [].size
+63 |   
+64 |       with pytest.warns(UserWarning):
+   |  _____^
+65 | |         async with context_manager_under_test():
+66 | |             if True:
+67 | |                 warnings.warn("foo")
+   | |____________________________________^ PT028
+   |
+
+PT028.py:71:5: PT028 `pytest.warns()` block should contain a single simple statement
+   |
+70 |   def test_error_try():
+71 |       with pytest.warns(UserWarning):
+   |  _____^
+72 | |         try:
+73 | |             [].size
+74 | |         except:
+75 | |             warnings.warn("foo")
+   | |________________________________^ PT028
+   |
